@@ -1,13 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-
+import icon from "/mlclub_ico_light.png"
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
-  // Close the dropdown if user clicks outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -18,62 +17,76 @@ function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Standard styling for desktop links
-  // 'isActive' is provided by NavLink automatically
+  // Desktop Link Styles: Charcoal background, Blue highlights
   const navLinkStyles = ({ isActive }) => 
-    `px-3 py-2 transition-colors ${isActive ? 'text-white font-bold underline' : 'text-black hover:opacity-70'}`;
+    `px-4 py-2 transition-all duration-200 border-b-2 ${
+      isActive 
+        ? 'text-blue-400 border-blue-500 font-semibold' 
+        : 'text-gray-400 border-transparent hover:text-blue-300'
+    }`;
 
-  // Standard styling for mobile dropdown links
+  // Mobile Dropdown Link Styles
   const mobileLinkStyles = ({ isActive }) => 
-    `px-4 py-3 text-sm text-left transition-colors ${isActive ? 'bg-blue-100 text-blue-700 font-bold' : 'hover:bg-blue-50 text-gray-700'}`;
+    `px-4 py-3 text-sm text-left transition-colors ${
+      isActive 
+        ? 'bg-blue-600 text-white font-bold' 
+        : 'text-gray-300 hover:bg-zinc-700 hover:text-blue-400'
+    }`;
 
   return (
-    <nav className='flex justify-between items-center sticky top-0 w-full h-14 bg-blue-200 px-4 z-50'>
+    <nav className='flex justify-between items-center sticky top-0 w-full h-16 bg-zinc-900 border-b border-zinc-800 px-6 z-50'>
+      
       {/* LEFT: LOGO */}
-      <NavLink to="/" className='bg-red-400 w-40 h-10 flex items-center justify-center font-bold text-xs'>
-        WEBSITE LOGO AND NAME
+      <NavLink to="/" className='flex items-center gap-2'>
+        <div className='w-20 h-15 rounded-lg text-white font-black italic'>
+            <img src={icon} alt="ML Club" />
+        </div>
+        <span className='text-white font-bold tracking-tight hidden sm:block'>
+          ML<span className='text-blue-500'> CLUB</span>
+        </span>
       </NavLink>
 
-      {/* CENTER: DESKTOP NAVIGATION (Hidden on Mobile) */}
-      <div className='hidden md:flex justify-around items-center bg-red-500 w-[400px] h-10'>
-        <NavLink to="/page1" className={navLinkStyles}>Button 1</NavLink>
-        <NavLink to="/page2" className={navLinkStyles}>Button 2</NavLink>
-        <NavLink to="/page3" className={navLinkStyles}>Button 3</NavLink>
-        <NavLink to="/page4" className={navLinkStyles}>Button 4</NavLink>
+      {/* CENTER: DESKTOP NAVIGATION */}
+      <div className='hidden md:flex items-center gap-4'>
+        <NavLink to="/page1" className={navLinkStyles}>Dashboard</NavLink>
+        <NavLink to="/page2" className={navLinkStyles}>Projects</NavLink>
+        <NavLink to="/page3" className={navLinkStyles}>Analytics</NavLink>
+        <NavLink to="/page4" className={navLinkStyles}>Teams</NavLink>
       </div>
 
-      {/* RIGHT: USER INFO & DROPDOWN CONTAINER */}
+      {/* RIGHT: USER INFO & DROPDOWN */}
       <div className='relative' ref={menuRef}>
         <div 
           onClick={toggleMenu} 
-          className='bg-red-400 px-4 h-10 flex items-center justify-center cursor-pointer select-none'
+          className='flex items-center gap-3 bg-zinc-800 border border-zinc-700 px-3 py-1.5 rounded-full cursor-pointer hover:border-blue-500/50 transition-all select-none'
         >
-          USER INFO 
-          <span className={`ml-2 transition-transform md:hidden ${isOpen ? 'rotate-180' : ''}`}>▼</span>
+          {/* Avatar Placeholder */}
+          <div className='w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold'>KP</div>
+          <span className='text-gray-200 text-sm font-medium hidden sm:inline'>User Profile</span>
+          <span className={`text-[10px] text-gray-500 transition-transform md:hidden ${isOpen ? 'rotate-180' : ''}`}>▼</span>
         </div>
 
-        {/* DROPDOWN MENU (Mobile Only) */}
+        {/* DROPDOWN MENU */}
         {isOpen && (
-          <div className='absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-xl rounded-md overflow-hidden md:hidden'>
+          <div className='absolute right-0 mt-3 w-60 bg-zinc-800 border border-zinc-700 shadow-2xl rounded-xl overflow-hidden md:hidden animate-in fade-in slide-in-from-top-2 duration-200'>
             {/* User Details Header */}
-            <div className='bg-gray-50 p-4 border-b border-gray-100'>
-              <p className='font-bold text-sm'>John Doe</p>
-              <p className='text-xs text-gray-500'>user@example.com</p>
+            <div className='bg-zinc-900/50 p-4 border-b border-zinc-700'>
+              <p className='text-white font-bold text-sm'>John Doe</p>
+              <p className='text-xs text-blue-400'>Admin Account</p>
             </div>
 
             {/* Links */}
             <div className='flex flex-col py-2'>
-              {/* Note: onClick={toggleMenu} ensures the menu closes after clicking a link */}
-              <NavLink to="/page1" onClick={toggleMenu} className={mobileLinkStyles}>Button 1</NavLink>
-              <NavLink to="/page2" onClick={toggleMenu} className={mobileLinkStyles}>Button 2</NavLink>
-              <NavLink to="/page3" onClick={toggleMenu} className={mobileLinkStyles}>Button 3</NavLink>
-              <NavLink to="/page4" onClick={toggleMenu} className={mobileLinkStyles}>Button 4</NavLink>
+              <NavLink to="/page1" onClick={toggleMenu} className={mobileLinkStyles}>Dashboard</NavLink>
+              <NavLink to="/page2" onClick={toggleMenu} className={mobileLinkStyles}>Projects</NavLink>
+              <NavLink to="/page3" onClick={toggleMenu} className={mobileLinkStyles}>Analytics</NavLink>
+              <NavLink to="/page4" onClick={toggleMenu} className={mobileLinkStyles}>Teams</NavLink>
               
-              <hr className="my-1 border-gray-100" />
+              <div className='h-[1px] bg-zinc-700 my-2 mx-4'></div>
               
-              <NavLink to="/profile" onClick={toggleMenu} className={mobileLinkStyles}>Profile Settings</NavLink>
-              <button className='px-4 py-3 text-left hover:bg-red-50 text-sm text-red-600 font-medium'>
-                Logout
+              <NavLink to="/profile" onClick={toggleMenu} className={mobileLinkStyles}>Settings</NavLink>
+              <button className='px-4 py-3 text-left text-sm text-red-400 hover:bg-red-500/10 transition-colors font-medium'>
+                Sign Out
               </button>
             </div>
           </div>
