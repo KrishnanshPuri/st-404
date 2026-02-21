@@ -6,6 +6,7 @@ function App() {
   return (
     <>
     <Navbar / >
+     <p className="bg-red-700">Hello</p>
       <Signin/>
     </>
   )
