@@ -1,180 +1,218 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { Canvas, useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 
-function Landing() {
-  const targetRef = useRef(null);
+// --- 3D Morphing Galaxy Component ---
+function ParticleGalaxy() {
+  const pointsRef = useRef();
   
-  const { scrollYProgress } = useScroll({
-    target: targetRef,
+  // Generate 5000 particles in a spherical/galaxy formation
+  const particlesCount = 5000;
+  const positions = useMemo(() => {
+    const pos = new Float32Array(particlesCount * 3);
+    for (let i = 0; i < particlesCount; i++) {
+      const distance = 2.5 * Math.cbrt(Math.random());
+      const theta = Math.random() * 2 * Math.PI;
+      const phi = Math.acos(2 * Math.random() - 1);
+      
+      pos[i * 3] = distance * Math.sin(phi) * Math.cos(theta);     // x
+      pos[i * 3 + 1] = distance * Math.sin(phi) * Math.sin(theta); // y
+      pos[i * 3 + 2] = distance * Math.cos(phi);                   // z
+    }
+    return pos;
+  }, []);
+
+  useFrame((state, delta) => {
+    if (!pointsRef.current) return;
+    
+    // The "Moving In From Out" Effect
+    // Starts massive (scale 5) and smoothly shrinks to normal (scale 1)
+    pointsRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), 0.02);
+    
+    // Smooth morphing rotation
+    pointsRef.current.rotation.y += delta * 0.05;
+    pointsRef.current.rotation.x += delta * 0.02;
   });
 
-  const xRaw = useTransform(scrollYProgress, [0, 1], ["0%", "-75%"]);
-  const x = useSpring(xRaw, { stiffness: 100, damping: 30, restDelta: 0.001 });
+  return (
+    // Initial scale is 5 to start "outside" the viewport
+    <points ref={pointsRef} scale={[5, 5, 5]}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={positions.length / 3}
+          array={positions}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <pointsMaterial 
+        size={0.015} 
+        color="#a855f7" // Elegant purple/indigo AI glow
+        sizeAttenuation 
+        transparent 
+        opacity={0.6} 
+        blending={THREE.AdditiveBlending} 
+      />
+    </points>
+  );
+}
+
+function Landing() {
+  // Ultra-smooth, elegant scroll animation settings
+  const fadeUpVariant = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0, transition: { duration: 1, ease: [0.25, 0.1, 0.25, 1] } }
+  };
 
   return (
-    <div className="bg-zinc-950 text-zinc-100 selection:bg-blue-500/30">
-      {/* 1. HERO SECTION */}
-      <section className="pt-32 pb-24 px-6 border-b border-zinc-900">
-        <div className="max-w-6xl mx-auto flex flex-col items-center text-center">
+    <div className="bg-black text-zinc-200 selection:bg-purple-500/30 overflow-hidden font-sans">
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          display: flex;
+          width: 200%;
+          animation: marquee 40s linear infinite;
+        }
+      `}</style>
+
+      {/* 1. MAIN HERO */}
+      <section className="relative min-h-screen flex flex-col justify-center items-center px-6">
+        
+        {/* 3D Galaxy Canvas */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <Canvas camera={{ position: [0, 0, 4], fov: 50 }}>
+            <ParticleGalaxy />
+          </Canvas>
+          {/* Subtle vignette overlay to blend edges into pure black */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_100%)]"></div>
+        </div>
+
+        {/* Hero Content - Glassmorphism & Minimalist */}
+        <div className="max-w-5xl mx-auto text-center relative z-10 mt-20">
           <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-2 mb-8 px-4 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/50 text-xs font-medium text-blue-500 uppercase tracking-widest"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8, duration: 1 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-xs font-medium tracking-widest text-zinc-400 uppercase mb-8"
           >
-            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
             NIT Jalandhar Chapter
           </motion.div>
-
-          <h1 className="text-5xl md:text-[5.5rem] font-bold tracking-tight mb-8 leading-[1.05]">
-            Engineering the <br />
-            <span className="text-blue-500">Intelligence</span> of Tomorrow.
-          </h1>
           
-          <p className="text-xl text-zinc-400 max-w-3xl mx-auto mb-12 leading-relaxed">
-            A professional research group led by Atharv Dubey at NIT Jalandhar, 
-            focused on bridging the gap between mathematical theory and 
-            production-ready ML infrastructure.
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-4">
-            <NavLink to="/authentication" className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold transition-all shadow-lg shadow-blue-600/20">
-              Get Started
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 1 }}
+            className="text-6xl md:text-8xl font-extrabold tracking-tighter mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-600"
+          >
+            Intelligence, <br />
+            Architected.
+          </motion.h1>
+          
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2, duration: 1 }}
+            className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-12 font-light leading-relaxed"
+          >
+            A premier research and development club mastering the mathematical and structural foundations of modern Machine Learning systems.
+          </motion.p>
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.4, duration: 1 }}
+            className="flex flex-col sm:flex-row justify-center gap-6"
+          >
+            <NavLink to="/signin" className="px-8 py-4 bg-white text-black rounded-full font-semibold hover:bg-zinc-200 transition-colors shadow-[0_0_30px_-5px_rgba(255,255,255,0.3)]">
+              Initialize Sequence
             </NavLink>
-            <button className="px-8 py-4 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 rounded-lg font-bold transition-all">
-              Research Papers
+            <button className="px-8 py-4 bg-transparent border border-white/20 hover:border-white/50 hover:bg-white/5 text-white rounded-full font-semibold transition-all">
+              Explore Research
             </button>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. TECHNOLOGY MARQUEE (New Section) */}
-{/* MARQUEE SECTION */}
-<div className="py-12 border-b border-zinc-900 bg-zinc-900/5 overflow-hidden">
-  {/* CSS for the infinite scroll */}
-  <style>{`
-    @keyframes marquee {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-    .animate-marquee-slow {
-      display: flex;
-      width: max-content;
-      animation: marquee 40s linear infinite;
-    }
-  `}</style>
-
-  <div className="flex items-center gap-4 px-6 mb-6">
-    <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em]">
-      Built with modern stacks
-    </span>
-    <div className="h-px flex-1 bg-zinc-900" />
-  </div>
-
-  <div className="flex overflow-hidden">
-    <div className="animate-marquee-slow flex items-center">
-      {/* We duplicate the content to create the seamless loop */}
-      {[...Array(2)].map((_, i) => (
-        <div key={i} className="flex gap-16 items-center px-8">
-          <TechIcon name="PyTorch" />
-          <TechIcon name="TensorFlow" />
-          <TechIcon name="CUDA" />
-          <TechIcon name="Docker" />
-          <TechIcon name="React" />
-          <TechIcon name="C++" />
-          <TechIcon name="Scikit-Learn" />
-          <TechIcon name="Tailwind" />
-        </div>
-      ))}
-    </div>
-  </div>
-</div>
-
-      {/* 3. METHODOLOGY */}
-      <section className="py-24 px-6 bg-zinc-900/20 border-b border-zinc-900">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-16">
-          <MethodologyItem 
-            num="01" 
-            title="Theory" 
-            desc="Deep dives into Linear Algebra and Abstract Algebra foundations for AI." 
-          />
-          <MethodologyItem 
-            num="02" 
-            title="Systems" 
-            desc="High-performance C++ and Docker infrastructure." 
-          />
-          <MethodologyItem 
-            num="03" 
-            title="Scale" 
-            desc="Deploying open-source research engines like Velvex to the community." 
-          />
-        </div>
-      </section>
-
-      {/* 4. PINNED HORIZONTAL FEATURES */}
-      <section ref={targetRef} className="relative h-[600vh] bg-zinc-950">
-        <div className="sticky top-0 flex h-screen items-center overflow-hidden">
-          <motion.div style={{ x }} className="flex">
-            <FeatureSlide num="01" title="Full-Stack Curriculum" desc="Comprehensive paths covering Calculus, ML foundations, and LLM fine-tuning." img="https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=1000" />
-            <FeatureSlide num="02" title="Algorhythm Spaces" desc="Interactive competitive programming sandboxes for algorithm research." img="https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=1000" />
-            <FeatureSlide num="03" title="Modular Architecture" desc="Learn structured system design focused on technical deep-retention." img="https://images.unsplash.com/photo-1454165833767-027ffea9e77b?q=80&w=1000" />
-            <FeatureSlide num="04" title="Expert Mentorship" desc="Content audited by NIT Jalandhar veterans and industry experts." img="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=1000" />
           </motion.div>
         </div>
       </section>
 
-      {/* 5. ROADMAP */}
-      <section className="py-32 px-6 bg-zinc-900/10 border-t border-zinc-900">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl font-bold mb-4">2026 Roadmap</h2>
-            <div className="h-1 w-20 bg-blue-600 mx-auto rounded-full" />
-          </div>
-          <div className="space-y-0 border-l border-zinc-800">
-            <RoadmapItem q="Q1" title="Velvex 2.0 Docs Engine" desc="Deploying the high-performance C++ documentation engine." />
-            <RoadmapItem q="Q2" title="Algorhythm Public Beta" desc="Opening our competitive programming platform for testing." />
-            <RoadmapItem q="Q3" title="Neural Cryptography" desc="Research on group theory foundations in machine learning safety." />
-          </div>
+      {/* 2. SUBTLE MARQUEE */}
+      <div className="py-8 border-y border-white/5 bg-white/[0.02] overflow-hidden relative">
+        <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-black to-transparent z-10"></div>
+        <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-black to-transparent z-10"></div>
+        <div className="animate-marquee whitespace-nowrap opacity-40">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="flex gap-24 items-center px-12">
+              <MarqueeItem text="PyTorch" />
+              <MarqueeItem text="TensorFlow" />
+              <MarqueeItem text="React" />
+              <MarqueeItem text="C++" />
+              <MarqueeItem text="CUDA" />
+              <MarqueeItem text="Docker" />
+              <MarqueeItem text="JavaScript" />
+              <MarqueeItem text="NumPy" />
+            </div>
+          ))}
         </div>
-      </section>
+      </div>
 
-      {/* 6. TEAM */}
-      <section className="py-32 px-6 border-t border-zinc-900">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold mb-20 text-center tracking-tighter text-zinc-100">Core Research Team</h2>
+      {/* 3. MINIMALIST FEATURES */}
+      <div className="py-32 space-y-32">
+        <FeatureSection 
+          index={0}
+          title="The Math Behind the Magic."
+          desc="We strip away the abstraction. Understand the core logic from foundational Linear Algebra to deploying high-performance models in C++ and Python."
+        />
+        <FeatureSection 
+          index={1}
+          title="Sandboxed Innovation."
+          desc="Test and iterate instantly. We provide integrated environments modeled after industry-standard IDEs to run neural networks in real-time."
+        />
+        <FeatureSection 
+          index={2}
+          title="Curated Mastery."
+          desc="Structured, module-based learning paths vetted by NIT Jalandhar's veteran researchers. No noise, just signal."
+        />
+      </div>
+
+      {/* 4. TEAM SECTION */}
+      <section className="py-32 px-6 border-t border-white/5 relative">
+        {/* Subtle background glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-64 bg-purple-500/10 blur-[100px] pointer-events-none"></div>
+        
+        <motion.div 
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={fadeUpVariant}
+          className="max-w-6xl mx-auto relative z-10"
+        >
+          <div className="text-center mb-24">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight text-white">The Core Protocol</h2>
+            <p className="text-zinc-500 text-lg font-light">Engineers driving the future of ML at NIT Jalandhar.</p>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <TeamMember name="Atharv Dubey" role="Founder & Core Engineer" />
-            <TeamMember name="Krishnansh Puri" role="Full Stack Lead" />
-            <TeamMember name="Krish Baghla" role="ML Research Lead" />
-            <TeamMember name="Laksh Arora" role="Systems Architect" />
+            <TeamMember name="Atharv Dubey" role="Founder & Core Engineer" delay={0.1} />
+            <TeamMember name="Krishnansh Puri" role="Full Stack Lead" delay={0.2} />
+            <TeamMember name="Krish Baghla" role="ML Research Lead" delay={0.3} />
+            <TeamMember name="Laksh Arora" role="Systems Architect" delay={0.4} />
           </div>
-        </div>
+        </motion.div>
       </section>
 
-      {/* 7. FAQ */}
-      <section className="py-32 px-6 border-t border-zinc-900 bg-zinc-900/10">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold mb-16 text-center text-zinc-100">Frequently Asked Questions</h2>
-          <div className="grid gap-6">
-            <FAQItem q="Who is the target audience for ML CLUB?" a="Engineers and researchers at NIT Jalandhar aiming for production-grade AI expertise." />
-            <FAQItem q="What is Velvex?" a="A specialized C++ engine for documenting complex technical libraries." />
-            <FAQItem q="Is coding knowledge required?" a="Yes. We leverage competitive programming and Docker for systems training." />
+      {/* 5. FOOTER */}
+      <footer className="py-12 px-6 border-t border-white/10 bg-black">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="text-center md:text-left">
+            <div className="text-lg font-bold tracking-widest text-white mb-1">ML CLUB</div>
+            <p className="text-zinc-600 text-xs uppercase tracking-wider">NIT Jalandhar © 2026</p>
           </div>
-        </div>
-      </section>
-
-      {/* 8. FOOTER */}
-      <footer className="py-20 px-6 border-t border-zinc-900 bg-zinc-950">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center text-sm text-zinc-500">
-          <div className="mb-8 md:mb-0 flex items-center gap-4">
-            <span className="text-zinc-100 font-bold tracking-tighter">ML CLUB</span>
-            <span className="text-zinc-800">|</span>
-            <span>NIT Jalandhar</span>
-          </div>
-          <div className="flex gap-12">
-            <a href="#" className="hover:text-blue-500 transition-colors">Twitter</a>
-            <a href="https://github.com/AtharvDubey12/Algorhythm" className="hover:text-blue-500 transition-colors">GitHub</a>
-            <a href="#" className="hover:text-blue-500 transition-colors">LinkedIn</a>
+          <div className="flex gap-8 text-sm font-medium text-zinc-500">
+            <a href="#" className="hover:text-white transition-colors">Documentation</a>
+            <a href="#" className="hover:text-white transition-colors">GitHub</a>
+            <a href="#" className="hover:text-white transition-colors">Privacy</a>
           </div>
         </div>
       </footer>
@@ -182,101 +220,62 @@ function Landing() {
   );
 }
 
+// --- Sub-components ---
 
-function TechIcon({ name }) {
-  // Mapping names to simple path-based icons or recognizable placeholders
-  const icons = {
-    "PyTorch": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg",
-    "TensorFlow": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tensorflow/tensorflow-original.svg",
-    "CUDA": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nvidia/nvidia-original.svg",
-    "Docker": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg",
-    "React": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg",
-    "C++": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg",
-    "Scikit-Learn": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pandas/pandas-original.svg", // Using Pandas as a placeholder for Scikit
-    "Tailwind": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original-wordmark.svg"
-  };
-
-  return (
-    <div className="flex items-center gap-3 group cursor-default">
-      <img 
-        src={icons[name]} 
-        alt={name} 
-        className="w-6 h-6 grayscale group-hover:grayscale-0 transition-all duration-300 opacity-40 group-hover:opacity-100" 
-      />
-      <span className="text-xl font-bold text-zinc-800 uppercase tracking-tighter group-hover:text-blue-500 transition-colors duration-300">
-        {name}
-      </span>
-    </div>
-  );
+function MarqueeItem({ text }) {
+  return <span className="text-xl font-light text-zinc-300 tracking-[0.2em] uppercase">{text}</span>;
 }
 
-// Sub-components for Google-Style branding
-function MarqueeIcon({ text }) {
+function FeatureSection({ index, title, desc }) {
+  const isEven = index % 2 === 0;
+  
   return (
-    <span className="text-xl md:text-3xl font-black text-zinc-800 uppercase tracking-tighter group-hover:text-blue-500/20 transition-colors duration-500 cursor-default">
-      {text}
-    </span>
-  );
-}
-
-function MethodologyItem({ num, title, desc }) {
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="text-blue-500 font-mono text-xs tracking-widest">{num} // {title.toUpperCase()}</div>
-      <h3 className="text-2xl font-bold tracking-tight text-zinc-100">{title}</h3>
-      <p className="text-zinc-500 leading-relaxed text-sm">{desc}</p>
-    </div>
-  );
-}
-
-function FeatureSlide({ num, title, desc, img }) {
-  return (
-    <div className="h-screen w-screen flex-shrink-0 flex items-center justify-center p-6 md:p-24">
-      <div className="max-w-7xl w-full grid md:grid-cols-2 gap-24 items-center">
-        <div>
-          <span className="text-blue-500 font-bold text-xs uppercase tracking-[0.3em] mb-6 block">Feature {num}</span>
-          <h2 className="text-5xl md:text-7xl font-bold mb-10 tracking-tighter leading-[1.1] text-zinc-100">{title}</h2>
-          <p className="text-xl text-zinc-400 leading-relaxed max-w-lg">{desc}</p>
+    <section className="px-6">
+      <motion.div 
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+        className="max-w-6xl mx-auto grid md:grid-cols-12 gap-12 items-center"
+      >
+        <div className={`md:col-span-5 ${isEven ? 'md:order-1' : 'md:order-2 md:col-start-8'}`}>
+          <div className="w-8 h-[2px] bg-purple-500 mb-8"></div>
+          <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight text-white">{title}</h2>
+          <p className="text-lg text-zinc-400 font-light leading-relaxed mb-8">{desc}</p>
+          <button className="text-sm font-semibold tracking-widest uppercase text-white hover:text-purple-400 transition-colors flex items-center gap-3">
+            Read Docs <span className="text-lg">→</span>
+          </button>
         </div>
-        <div className="aspect-video bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden shadow-2xl">
-          <img src={img} className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000" alt={title} />
+        
+        <div className={`md:col-span-6 ${isEven ? 'md:order-2 md:col-start-7' : 'md:order-1'}`}>
+          {/* Abstract geometric wireframe box replacing the heavy images */}
+          <div className="aspect-square md:aspect-[4/3] rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent backdrop-blur-sm flex items-center justify-center relative overflow-hidden group">
+             <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
+             <div className="w-32 h-32 border border-purple-500/30 rounded-full group-hover:scale-110 transition-transform duration-1000 ease-out flex items-center justify-center">
+                <div className="w-16 h-16 border border-white/20 rounded-full"></div>
+             </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </section>
   );
 }
 
-function RoadmapItem({ q, title, desc }) {
+function TeamMember({ name, role, delay }) {
   return (
-    <div className="relative pl-12 pb-16 group">
-      <div className="absolute left-[-6px] top-0 w-3 h-3 rounded-full bg-blue-600 ring-8 ring-zinc-950 shadow-[0_0_15px_rgba(37,99,235,0.4)]" />
-      <div className="flex flex-col gap-2">
-        <span className="text-blue-500 font-bold font-mono text-sm uppercase tracking-widest">{q} Milestone</span>
-        <h4 className="text-2xl font-bold group-hover:text-blue-400 transition-colors text-zinc-100">{title}</h4>
-        <p className="text-zinc-500 leading-relaxed">{desc}</p>
-      </div>
-    </div>
-  );
-}
-
-function TeamMember({ name, role }) {
-  return (
-    <div className="p-10 bg-zinc-900/30 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors group">
-      <div className="w-12 h-12 bg-zinc-800 rounded-lg mb-8 flex items-center justify-center text-zinc-600 font-black tracking-tighter group-hover:bg-blue-600 group-hover:text-white transition-all">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: delay, duration: 0.8, ease: "easeOut" }}
+      className="p-8 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] hover:border-white/10 transition-all text-center group"
+    >
+      <div className="w-16 h-16 bg-black border border-white/10 rounded-full mx-auto mb-6 flex items-center justify-center text-xl font-light text-zinc-300 group-hover:border-purple-500/50 transition-colors shadow-inner">
         {name[0]}
       </div>
-      <h3 className="text-xl font-bold mb-2 text-zinc-100">{name}</h3>
-      <p className="text-xs text-zinc-600 uppercase tracking-widest font-bold">{role}</p>
-    </div>
-  );
-}
-
-function FAQItem({ q, a }) {
-  return (
-    <div className="p-8 bg-zinc-900/40 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-colors">
-      <h4 className="text-lg font-bold mb-3 text-zinc-200">{q}</h4>
-      <p className="text-sm text-zinc-500 leading-relaxed">{a}</p>
-    </div>
+      <h3 className="text-base font-semibold text-white mb-2 tracking-wide">{name}</h3>
+      <p className="text-xs text-zinc-500 uppercase tracking-widest font-medium">{role}</p>
+    </motion.div>
   );
 }
 
