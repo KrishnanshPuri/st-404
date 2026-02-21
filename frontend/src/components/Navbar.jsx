@@ -34,7 +34,7 @@ function Navbar() {
     }`;
 
   return (
-    <nav className='flex justify-between items-center sticky top-0 w-full h-16 bg-zinc-900 border-b border-zinc-800 px-6 z-50'>
+    <nav className='flex justify-between items-center sticky top-0 w-full h-16 bg-zinc-900/70 backdrop-blur-2xl border-zinc-800 px-6 z-50'>
       
       {/* LEFT: LOGO */}
       <NavLink to="/" className='flex items-center gap-2'>
