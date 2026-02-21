@@ -1,13 +1,15 @@
 import Navbar from "./components/Navbar"
 import Signin from "./pages/Signin"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 function App() {
 
   return (
     <>
-    <Navbar / >
-     <p className="bg-red-700">Hello</p>
-      <Signin/>
+    <Navbar />
+    <Routes>
+      <Route path="/authentication" element={<Signin />} />
+    </Routes>
     </>
   )
 }
