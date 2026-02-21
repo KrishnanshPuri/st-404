@@ -1,4 +1,5 @@
 import Navbar from "./components/Navbar"
+import Signin from "./pages/Signin"
 
 function App() {
 
@@ -6,6 +7,7 @@ function App() {
     <>
     <Navbar / >
      <p className="bg-red-700">Hello</p>
+      <Signin/>
     </>
   )
 }
