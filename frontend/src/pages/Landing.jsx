@@ -50,42 +50,58 @@ function Landing() {
 
       {/* 2. TECHNOLOGY MARQUEE (New Section) */}
 {/* MARQUEE SECTION */}
-<div className="py-12 border-b border-zinc-900 bg-zinc-900/5 overflow-hidden">
-  {/* CSS for the infinite scroll */}
+{/* MARQUEE SECTION */}
+<div className="py-12 border-b border-zinc-900 bg-zinc-950 overflow-hidden">
   <style>{`
     @keyframes marquee {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
+      from { transform: translateX(0); }
+      to { transform: translateX(calc(-50% - 2.5rem)); } /* -50% plus half the gap for a perfect snap-free loop */
     }
-    .animate-marquee-slow {
+    .animate-marquee-infinite {
       display: flex;
       width: max-content;
-      animation: marquee 40s linear infinite;
+      gap: 5rem; /* Explicit gap (80px) */
+      animation: marquee 30s linear infinite;
+    }
+    .animate-marquee-infinite:hover {
+      animation-play-state: paused;
     }
   `}</style>
 
-  <div className="flex items-center gap-4 px-6 mb-6">
+  <div className="flex items-center gap-4 px-6 mb-8 max-w-6xl mx-auto">
     <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em]">
-      Built with modern stacks
+      Technologies driving ML CLUB
     </span>
     <div className="h-px flex-1 bg-zinc-900" />
   </div>
 
-  <div className="flex overflow-hidden">
-    <div className="animate-marquee-slow flex items-center">
-      {/* We duplicate the content to create the seamless loop */}
-      {[...Array(2)].map((_, i) => (
-        <div key={i} className="flex gap-16 items-center px-8">
-          <TechIcon name="PyTorch" />
-          <TechIcon name="TensorFlow" />
-          <TechIcon name="CUDA" />
-          <TechIcon name="Docker" />
-          <TechIcon name="React" />
-          <TechIcon name="C++" />
-          <TechIcon name="Scikit-Learn" />
-          <TechIcon name="Tailwind" />
-        </div>
-      ))}
+  <div className="relative flex">
+   
+    <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-zinc-950 to-transparent z-10" />
+    <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-zinc-950 to-transparent z-10" />
+
+    <div className="animate-marquee-infinite flex items-center">
+      {/* Group 1 */}
+      <div className="flex gap-20 items-center">
+        <TechIcon name="PyTorch" />
+        <TechIcon name="TensorFlow" />
+        <TechIcon name="CUDA" />
+        <TechIcon name="Docker" />
+        <TechIcon name="React" />
+        <TechIcon name="C++" />
+        <TechIcon name="Scikit-Learn" />
+        <TechIcon name="Tailwind" />
+      </div>
+      <div className="flex gap-20 items-center">
+        <TechIcon name="PyTorch" />
+        <TechIcon name="TensorFlow" />
+        <TechIcon name="CUDA" />
+        <TechIcon name="Docker" />
+        <TechIcon name="React" />
+        <TechIcon name="C++" />
+        <TechIcon name="Scikit-Learn" />
+        <TechIcon name="Tailwind" />
+      </div>
     </div>
   </div>
 </div>
