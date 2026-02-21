@@ -41,9 +41,9 @@ function Navbar() {
         <div className='w-20 h-15 rounded-lg text-white font-black italic'>
             <img src={icon} alt="ML Club" />
         </div>
-        <span className='text-white font-bold tracking-tight hidden sm:block'>
+        {/* <span className='text-white font-bold tracking-tight hidden sm:block'>
           ML<span className='text-blue-500'> CLUB</span>
-        </span>
+        </span> */}
       </NavLink>
 
       {/* CENTER: DESKTOP NAVIGATION */}
@@ -82,7 +82,7 @@ function Navbar() {
               <NavLink to="/page3" onClick={toggleMenu} className={mobileLinkStyles}>Analytics</NavLink>
               <NavLink to="/page4" onClick={toggleMenu} className={mobileLinkStyles}>Teams</NavLink>
               
-              <div className='h-[1px] bg-zinc-700 my-2 mx-4'></div>
+              <div className='h-px bg-zinc-700 my-2 mx-4'></div>
               
               <NavLink to="/profile" onClick={toggleMenu} className={mobileLinkStyles}>Settings</NavLink>
               <button className='px-4 py-3 text-left text-sm text-red-400 hover:bg-red-500/10 transition-colors font-medium'>
