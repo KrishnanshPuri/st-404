@@ -37,7 +37,7 @@ function Navbar() {
     }`;
 
   return (
-    <nav className='flex justify-between items-center sticky top-0 w-full h-16 bg-zinc-900/70 backdrop-blur-2xl border-b border-zinc-800 px-6 z-50'>
+    <nav className='flex justify-between items-center sticky top-0 w-full h-16 bg-zinc-950/70 backdrop-blur-2xl border-b border-zinc-800 px-6 z-50'>
       
       {/* LEFT: LOGO */}
       <NavLink to="/" className='flex items-center gap-2'>
@@ -58,10 +58,10 @@ function Navbar() {
       <div className='relative' ref={menuRef}>
         <div 
           onClick={toggleMenu} 
-          className='flex items-center gap-3 bg-zinc-800 border border-zinc-700 px-3 py-1.5 rounded-full cursor-pointer hover:border-blue-500/50 transition-all select-none'
+          className='flex items-center gap-3 bg-zinc-900 border border-zinc-700 px-3 py-1.5 rounded-full cursor-pointer hover:border-blue-500/50 transition-all select-none'
         >
           {/* Avatar Placeholder */}
-          <div className='w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold'>KP</div>
+          <div className='w-7 h-7 bg-blue-400 rounded-full flex items-center justify-center text-white text-xs font-bold'>KP</div>
           <span className='text-gray-200 text-sm font-medium hidden sm:inline'>User Profile</span>
           <span className={`text-[10px] text-gray-500 transition-transform md:hidden ${isOpen ? 'rotate-180' : ''}`}>▼</span>
         </div>
